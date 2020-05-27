@@ -1,0 +1,19 @@
+seoul_code <- read.table('서울법정동코드.txt', sep = '\t', header = T, stringsAsFactors = F)
+
+code <- seoul_code[seoul_code$폐지여부 == '존재', ]
+# 현재 존재하는 행정동에 대해서만 code로 데이터프레임을 만든다
+
+code$구 <- str_extract(code$법정동명, '[가-힣]{1,}구')
+# 정규표현식을 활용하여 ‘~구’ 형태의 문자열을 ‘구’라는 컬럼으로 추가한다
+
+code$동 <- str_extract(code$법정동명, '[가-힣]{1,}동[1-9]?[가-힣]?')
+# 정규표현식을 활용하여 ‘~동 / ~동~가’ 형태의 문자열을 ‘동’이라는 컬럼으로 추가한다
+
+gangnam_dong <- code$동[code$구 == '강남구',] %>% unique()
+# 강남구에 포함된 동 이름들을 리스트로 만든다
+
+gangnam_apt <- seoul_apt[seoul_apt$dong %in% gangnam_dong,]
+# 서울시 아파트 거래 정보 중에서 dong이 강남구 동 리스트에 있는 데이터만 추출해서 gangnam_apt로 데이터프레임을 만든다
+
+write.csv(gangnam_apt, 'gangnam_apt.csv')
+# csv로 저장
